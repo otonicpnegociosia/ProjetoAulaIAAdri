@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistente Financeiro</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">💰 <span>Assistente Financeiro</span></div>
+    <div class="month-nav">
+      <button id="prevMonth" title="Mês anterior">‹</button>
+      <input type="month" id="monthPicker">
+      <button id="nextMonth" title="Próximo mês">›</button>
+    </div>
+    <div class="topbar-actions">
+      <button id="btnExport" class="btn-secondary">Exportar backup</button>
+      <button id="btnImportBackup" class="btn-secondary">Importar backup</button>
+      <input type="file" id="fileBackup" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
+    <button class="tab" data-tab="lancamentos">📋 Lançamentos</button>
+    <button class="tab" data-tab="importar">📥 Importar</button>
+    <button class="tab" data-tab="categorias">🏷️ Categorias</button>
+    <button class="tab" data-tab="config">⚙️ Configurações</button>
+  </nav>
+
+  <main>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section id="tab-dashboard" class="panel active">
+      <div class="kpis">
+        <div class="kpi-card receitas">
+          <span class="kpi-label">Receitas do mês</span>
+          <span class="kpi-value" id="kpiReceitas">R$ 0,00</span>
+        </div>
+        <div class="kpi-card despesas">
+          <span class="kpi-label">Despesas do mês</span>
+          <span class="kpi-value" id="kpiDespesas">R$ 0,00</span>
+        </div>
+        <div class="kpi-card saldo">
+          <span class="kpi-label">Saldo do mês</span>
+          <span class="kpi-value" id="kpiSaldo">R$ 0,00</span>
+        </div>
+        <div class="kpi-card fatura">
+          <span class="kpi-label">Fatura do cartão</span>
+          <span class="kpi-value" id="kpiFatura">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="card empty-state" id="dashboardEmptyState" hidden>
+        <p>Nenhum lançamento neste mês ainda.</p>
+        <div class="empty-actions">
+          <button id="btnGoImportar" class="btn-primary">Importar extrato/fatura</button>
+          <button id="btnCarregarDemo" class="btn-secondary">Carregar dados de exemplo</button>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="card">
+          <h3>Despesas por categoria</h3>
+          <div class="chart-wrap"><canvas id="chartCategorias"></canvas></div>
+          <p class="hint" id="legendCategoriasVazio" hidden>Sem despesas categorizadas neste mês.</p>
+        </div>
+        <div class="card">
+          <h3>Evolução mensal (últimos 6 meses)</h3>
+          <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Saldo por conta</h3>
+          <div class="chart-wrap"><canvas id="chartContas"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card reconciliacao">
+        <h3>Reconciliação de saldo <span class="hint-inline">(opcional — confira com o extrato real)</span></h3>
+        <div class="reconc-fields">
+          <label>Saldo inicial do mês <input type="text" id="saldoInicial" inputmode="decimal" placeholder="0,00"></label>
+          <label>Saldo final informado no extrato <input type="text" id="saldoFinalInformado" inputmode="decimal" placeholder="0,00"></label>
+        </div>
+        <p id="reconcStatus"></p>
+      </div>
+    </section>
+
+    <!-- ===================== LANÇAMENTOS ===================== -->
+    <section id="tab-lancamentos" class="panel">
+      <div class="toolbar">
+        <input type="search" id="buscaLanc" placeholder="🔍 Buscar por descrição...">
+        <select id="filtroCategoria"></select>
+        <select id="filtroConta"></select>
+        <select id="filtroTipo">
+          <option value="">Todos os tipos</option>
+          <option value="receita">Receitas</option>
+          <option value="despesa">Despesas</option>
+          <option value="transferencia">Transferências</option>
+        </select>
+        <button id="btnNovoLancamento" class="btn-primary">+ Novo lançamento</button>
+      </div>
+      <div class="table-wrap">
+        <table id="tabelaLancamentos">
+          <thead>
+            <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Tipo</th><th>Valor</th><th>Origem</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== IMPORTAR ===================== -->
+    <section id="tab-importar" class="panel">
+      <div class="import-tabs">
+        <button class="active" data-import="pdf">PDF — Extrato / Fatura</button>
+        <button data-import="csv">CSV</button>
+      </div>
+
+      <div id="importPdfPanel">
+        <p class="hint">Envie o extrato bancário ou a fatura do cartão em PDF. O sistema tenta ler os lançamentos automaticamente e sempre mostra uma revisão antes de importar de fato.</p>
+        <div class="form-row">
+          <label>Tipo de documento
+            <select id="tipoDocumentoPdf">
+              <option value="extrato">Extrato bancário</option>
+              <option value="fatura">Fatura de cartão</option>
+            </select>
+          </label>
+          <label>Conta destino <select id="contaDestinoPdf"></select></label>
+        </div>
+        <div class="dropzone" id="dropzonePdf">
+          <span>📄 Arraste o PDF aqui ou clique para selecionar</span>
+          <input type="file" id="filePdf" accept="application/pdf" hidden>
+        </div>
+        <p id="pdfStatus" class="status-msg"></p>
+      </div>
+
+      <div id="importCsvPanel" hidden>
+        <p class="hint">Envie um arquivo CSV exportado do seu banco. Você poderá indicar qual coluna é a data, a descrição e o valor.</p>
+        <div class="dropzone" id="dropzoneCsv">
+          <span>📄 Arraste o CSV aqui ou clique para selecionar</span>
+          <input type="file" id="fileCsv" accept=".csv,text/csv" hidden>
+        </div>
+        <div id="csvMapping" class="form-row" hidden>
+          <label>Coluna Data <select id="mapData"></select></label>
+          <label>Coluna Descrição <select id="mapDescricao"></select></label>
+          <label>Coluna Valor <select id="mapValor"></select></label>
+          <label>Conta destino <select id="contaDestinoCsv"></select></label>
+          <button id="btnPrepararPreviewCsv" class="btn-primary">Pré-visualizar</button>
+        </div>
+      </div>
+
+      <div id="reviewPanel" class="card" hidden>
+        <h3>Revisar antes de importar</h3>
+        <p class="hint">Confira datas, valores, tipo e categoria sugeridos. Desmarque o que não deve entrar. Linhas em amarelo parecem duplicadas de lançamentos já existentes.</p>
+        <div class="table-wrap">
+          <table id="tabelaReview">
+            <thead><tr><th></th><th>Data</th><th>Descrição</th><th>Valor</th><th>Tipo</th><th>Categoria</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="review-actions">
+          <button id="btnCancelarImport" class="btn-secondary">Cancelar</button>
+          <button id="btnConfirmarImport" class="btn-primary">Importar selecionados</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CATEGORIAS ===================== -->
+    <section id="tab-categorias" class="panel">
+      <div class="toolbar">
+        <p class="hint">Categorias são usadas para organizar despesas e sugerir automaticamente a classificação de novos lançamentos com base em palavras-chave.</p>
+        <button id="btnNovaCategoria" class="btn-primary">+ Nova categoria</button>
+      </div>
+      <div id="listaCategorias" class="lista-categorias"></div>
+    </section>
+
+    <!-- ===================== CONFIGURAÇÕES ===================== -->
+    <section id="tab-config" class="panel">
+      <div class="card">
+        <h3>Contas</h3>
+        <p class="hint">Contas correntes, cartões de crédito, poupanças etc. Cada lançamento pertence a uma conta.</p>
+        <div id="listaContas"></div>
+        <button id="btnNovaConta" class="btn-secondary">+ Nova conta</button>
+      </div>
+
+      <div class="card">
+        <h3>Backup dos dados</h3>
+        <p class="hint">Todos os dados ficam salvos apenas neste navegador (localStorage). Exporte um backup periodicamente.</p>
+        <div class="empty-actions">
+          <button id="btnExportConfig" class="btn-primary">Exportar backup (.json)</button>
+          <button id="btnImportBackupConfig" class="btn-secondary">Importar backup</button>
+          <input type="file" id="fileBackupConfig" accept="application/json" hidden>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Dados do mês atual</h3>
+        <div class="empty-actions">
+          <button id="btnCarregarDemoConfig" class="btn-secondary">Carregar dados de exemplo</button>
+          <button id="btnLimparMes" class="btn-danger">Apagar lançamentos do mês</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Modal de lançamento -->
+<dialog id="modalLancamento">
+  <form id="formLancamento">
+    <h3 id="modalTitulo">Novo lançamento</h3>
+    <label>Data <input type="date" id="campoData" required></label>
+    <label>Descrição <input type="text" id="campoDescricao" required placeholder="Ex: Supermercado, Salário..."></label>
+    <label>Valor (R$) <input type="text" id="campoValor" inputmode="decimal" required placeholder="0,00"></label>
+    <label>Tipo
+      <select id="campoTipo">
+        <option value="despesa">Despesa</option>
+        <option value="receita">Receita</option>
+        <option value="transferencia">Transferência</option>
+      </select>
+    </label>
+    <label>Categoria <select id="campoCategoria"></select></label>
+    <label>Conta <select id="campoConta"></select></label>
+    <div class="modal-actions">
+      <button type="button" id="btnFecharModal" class="btn-secondary">Cancelar</button>
+      <button type="submit" class="btn-primary">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/categorias.js"></script>
+<script src="js/csvImport.js"></script>
+<script src="js/pdfImport.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
