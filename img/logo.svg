@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="98" fill="#4f7d3c"/>
+
+  <!-- notas de dinheiro em leque -->
+  <g>
+    <rect x="66" y="58" width="58" height="36" rx="6" fill="#dfeecb" transform="rotate(-16 95 76)"/>
+    <rect x="72" y="52" width="58" height="36" rx="6" fill="#eef7e2" transform="rotate(-4 101 70)"/>
+    <rect x="78" y="50" width="58" height="36" rx="6" fill="#ffffff" transform="rotate(8 107 68)"/>
+    <text x="107" y="74" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700"
+          fill="#4f7d3c" text-anchor="middle" transform="rotate(8 107 68)">$</text>
+  </g>
+
+  <!-- mão -->
+  <g fill="#ffffff">
+    <rect x="54" y="96" width="15" height="34" rx="7.5"/>
+    <rect x="75" y="88" width="15" height="42" rx="7.5"/>
+    <rect x="97" y="84" width="15" height="46" rx="7.5"/>
+    <rect x="119" y="90" width="15" height="40" rx="7.5"/>
+    <path d="M48 128 Q48 108 68 106 L134 106 Q154 108 154 128 L154 146 Q154 162 134 164 L68 164 Q48 162 48 146 Z"/>
+  </g>
+
+  <text x="100" y="184" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800"
+        fill="#ffffff" text-anchor="middle" letter-spacing="1">FINANCE</text>
+</svg>
