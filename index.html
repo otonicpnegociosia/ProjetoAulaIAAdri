@@ -8,10 +8,21 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="app">
+<div class="app-shell">
 
+  <aside class="sidebar">
+    <div class="sidebar-brand"><img src="img/logo.svg" alt="" class="brand-logo"> <span>Assistente Financeiro</span></div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="tab" data-tab="importar">📥 Importar</button>
+      <button class="tab" data-tab="categorias">🏷️ Categorias</button>
+      <button class="tab" data-tab="lancamentos">📋 Lançamentos</button>
+      <button class="tab" data-tab="config">⚙️ Configurações</button>
+    </nav>
+  </aside>
+
+  <div class="content">
   <header class="topbar">
-    <div class="brand"><img src="img/logo.svg" alt="" class="brand-logo"> <span>Assistente Financeiro</span></div>
     <div class="month-nav">
       <button id="prevMonth" title="Mês anterior">‹</button>
       <input type="month" id="monthPicker">
@@ -23,14 +34,6 @@
       <input type="file" id="fileBackup" accept="application/json" hidden>
     </div>
   </header>
-
-  <nav class="tabs">
-    <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
-    <button class="tab" data-tab="lancamentos">📋 Lançamentos</button>
-    <button class="tab" data-tab="importar">📥 Importar</button>
-    <button class="tab" data-tab="categorias">🏷️ Categorias</button>
-    <button class="tab" data-tab="config">⚙️ Configurações</button>
-  </nav>
 
   <main>
 
@@ -207,6 +210,7 @@
     </section>
 
   </main>
+  </div>
 </div>
 
 <!-- Modal de lançamento -->
