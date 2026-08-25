@@ -4,10 +4,6 @@
 ====================================================================== */
 
 (() => {
-  // navegador ainda sem nenhum dado salvo localmente -> ao iniciar, busca os
-  // dados atuais do banco (Supabase) antes da primeira renderização
-  const semDadosLocaisAinda = localStorage.getItem(STORAGE_KEY) === null;
-
   let db = DB.load();
   let mesAtual = DB.mesId(new Date());
   let reviewPendentes = []; // lançamentos candidatos aguardando confirmação de import
@@ -736,12 +732,15 @@
     initDadosExemplo();
     initAtalhosDashboard();
 
-    if (semDadosLocaisAinda && SupabaseSync.ativo()) {
+    // a cada abertura do app, busca a versão mais atual dos dados no banco
+    // (mantém navegadores/dispositivos diferentes sincronizados); se o
+    // banco estiver indisponível, segue com o que já foi carregado do
+    // localStorage acima
+    if (SupabaseSync.ativo()) {
       const dadosAtuais = await SupabaseSync.buscarDadosAtuais();
       if (dadosAtuais) {
         db = dadosAtuais;
         DB.save(db);
-        toast('Dados atuais carregados do banco.', 'sucesso');
       }
     }
 

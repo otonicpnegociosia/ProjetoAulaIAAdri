@@ -93,9 +93,10 @@ Como funciona a sincronização (`js/supabaseSync.js`):
 - **Gravação**: toda vez que o app salva algo (`salvar()` em `js/ui.js`),
   os dados também são enviados (upsert) para as tabelas acima, em segundo
   plano, sem travar a interface.
-- **Leitura inicial**: se o navegador ainda não tem nada em `localStorage`
-  (primeiro acesso, ou um navegador/computador novo), o app busca os
-  dados atuais direto do banco antes de mostrar a tela.
+- **Leitura**: toda vez que o app é aberto, ele busca a versão mais atual
+  dos dados direto do banco (antes de mostrar a tela) e substitui o que
+  estiver em `localStorage` — assim navegadores/dispositivos diferentes
+  ficam sincronizados com os mesmos dados atuais.
 - **Modo offline**: se não houver internet ou o Supabase estiver
   indisponível, tudo isso falha silenciosamente (só um aviso no console)
   e o app continua funcionando normalmente só com `localStorage` — igual
