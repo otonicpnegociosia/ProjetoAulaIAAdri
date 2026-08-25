@@ -101,10 +101,13 @@ Como funciona a sincronização (`js/supabaseSync.js`):
   indisponível, tudo isso falha silenciosamente (só um aviso no console)
   e o app continua funcionando normalmente só com `localStorage` — igual
   já acontecia antes com os gráficos (Chart.js) e a leitura de PDF (pdf.js).
-- **Segurança**: como o app não tem tela de login, o banco usa uma chave
-  pública (`publishable key`) com Row Level Security habilitado e
-  políticas abertas para o cliente anônimo — ou seja, os dados não são
-  privados por usuário, servem como backup/mirror de uma única pessoa.
+- **Segurança**: o app não tem tela de login nem Row Level Security — o
+  acesso às tabelas é direto, usando a chave pública (`publishable key`).
+  Não há isolamento entre usuários nem proteção contra escrita: qualquer
+  pessoa com a chave (exposta no próprio código do front-end) consegue
+  ler e alterar os dados. Isso é aceitável aqui por ser um projeto de
+  estudo/uso pessoal de uma única pessoa; para um uso com dados sensíveis
+  de verdade, o recomendado seria habilitar autenticação e RLS.
 
 ## Backup
 
