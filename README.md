@@ -1,8 +1,10 @@
 # Assistente Financeiro — Dashboard Modular Mensal
 
-Dashboard financeiro pessoal em HTML/CSS/JS puro (sem backend, sem build).
-Todos os dados ficam salvos no navegador (`localStorage`) e podem ser
-exportados/importados como backup em JSON.
+Dashboard financeiro pessoal em HTML/CSS/JS puro (sem build). Os dados
+ficam salvos no navegador (`localStorage`) — o app funciona 100% offline
+— e também são espelhados em um banco de dados real (Supabase/Postgres),
+que serve como backup na nuvem e permite recuperar os dados atuais em um
+navegador novo. Também é possível exportar/importar backup em JSON.
 
 ## Como usar
 
@@ -20,6 +22,8 @@ exportados/importados como backup em JSON.
 |---|---|
 | `js/db.js` | Persistência em `localStorage`, modelo de dados, formatação de moeda |
 | `js/categorias.js` | Categorias padrão e auto-categorização por palavra-chave |
+| `js/supabaseClient.js` | Configura a conexão com o banco de dados (Supabase) |
+| `js/supabaseSync.js` | Sincroniza `localStorage` ↔ tabelas do banco (contas, categorias, meses, lançamentos) |
 | `js/csvImport.js` | Leitura de CSV e sugestão de mapeamento de colunas |
 | `js/pdfImport.js` | Extração de texto de PDF (pdf.js) + parser heurístico de lançamentos |
 | `js/charts.js` | Gráficos (Chart.js): categorias, evolução mensal, saldo por conta |
@@ -74,9 +78,35 @@ qualquer lançamento entrar no sistema, e a importação por CSV é uma
 alternativa mais confiável se o seu banco permitir exportar nesse
 formato.
 
+## Banco de dados (Supabase)
+
+Além do `localStorage`, o app está ligado a um banco Postgres no
+Supabase (projeto `Projeto1AulaIA`), com as tabelas:
+
+- `contas` — contas cadastradas (conta corrente, cartão de crédito...)
+- `categorias` — categorias e suas palavras-chave de auto-categorização
+- `meses` — saldo inicial e saldo final informado de cada mês (`YYYY-MM`)
+- `lancamentos` — todos os lançamentos, ligados a `meses`, `categorias` e `contas`
+
+Como funciona a sincronização (`js/supabaseSync.js`):
+
+- **Gravação**: toda vez que o app salva algo (`salvar()` em `js/ui.js`),
+  os dados também são enviados (upsert) para as tabelas acima, em segundo
+  plano, sem travar a interface.
+- **Leitura inicial**: se o navegador ainda não tem nada em `localStorage`
+  (primeiro acesso, ou um navegador/computador novo), o app busca os
+  dados atuais direto do banco antes de mostrar a tela.
+- **Modo offline**: se não houver internet ou o Supabase estiver
+  indisponível, tudo isso falha silenciosamente (só um aviso no console)
+  e o app continua funcionando normalmente só com `localStorage` — igual
+  já acontecia antes com os gráficos (Chart.js) e a leitura de PDF (pdf.js).
+- **Segurança**: como o app não tem tela de login, o banco usa uma chave
+  pública (`publishable key`) com Row Level Security habilitado e
+  políticas abertas para o cliente anônimo — ou seja, os dados não são
+  privados por usuário, servem como backup/mirror de uma única pessoa.
+
 ## Backup
 
-Como os dados vivem apenas no `localStorage` do navegador (não há
-servidor), exporte um backup em **Configurações → Exportar backup**
-regularmente — principalmente antes de limpar o cache do navegador ou
-trocar de computador.
+Além do banco de dados, exporte um backup local em
+**Configurações → Exportar backup** regularmente — principalmente antes
+de limpar o cache do navegador ou trocar de computador.

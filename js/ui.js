@@ -4,6 +4,10 @@
 ====================================================================== */
 
 (() => {
+  // navegador ainda sem nenhum dado salvo localmente -> ao iniciar, busca os
+  // dados atuais do banco (Supabase) antes da primeira renderização
+  const semDadosLocaisAinda = localStorage.getItem(STORAGE_KEY) === null;
+
   let db = DB.load();
   let mesAtual = DB.mesId(new Date());
   let reviewPendentes = []; // lançamentos candidatos aguardando confirmação de import
@@ -13,7 +17,10 @@
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
   const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
-  function salvar() { DB.save(db); }
+  function salvar() {
+    DB.save(db);
+    SupabaseSync.sincronizar(db); // espelha no banco em segundo plano (não bloqueia a UI)
+  }
 
   function toast(msg, tipo = 'info') {
     const container = $('#toast-container');
@@ -713,7 +720,7 @@
   }
 
   // ---------- init ----------
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     initTabs();
     initMonthPicker();
     initReconciliacao();
@@ -728,6 +735,16 @@
     initLimparMes();
     initDadosExemplo();
     initAtalhosDashboard();
+
+    if (semDadosLocaisAinda && SupabaseSync.ativo()) {
+      const dadosAtuais = await SupabaseSync.buscarDadosAtuais();
+      if (dadosAtuais) {
+        db = dadosAtuais;
+        DB.save(db);
+        toast('Dados atuais carregados do banco.', 'sucesso');
+      }
+    }
+
     renderTudo();
   });
 })();
